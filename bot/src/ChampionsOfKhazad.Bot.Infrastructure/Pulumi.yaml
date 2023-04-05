@@ -1,0 +1,7 @@
+name: ChampionsOfKhazad.Bot.Infrastructure
+runtime: dotnet
+description: CoK Bot infrastructure project
+config:
+  azure-native:location: westeurope
+  azure-native:subscriptionId: 281b79a8-9704-4582-b199-19613027945b
+  ChampionsOfKhazad.Bot.Infrastructure:imageRegistryUsername: uncledave

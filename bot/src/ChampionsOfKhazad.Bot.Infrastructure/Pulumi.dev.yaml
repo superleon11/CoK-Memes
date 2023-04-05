@@ -1,0 +1,8 @@
+config:
+  ChampionsOfKhazad.Bot.Infrastructure:botToken:
+    secure: AAABABHjU8PDGZ8OTFPpqgdHY/XTdXhIc/Fa5RPaAyIbOt1RPpapnZ4bsiHOm6iCBjmO+8etjjI6VLfqio3N2uZfgrCd6GWaqnb6k7YIfbTVVPtF+lN8s3jmLkv3ga7Pkh7IzL6BM8g=
+  ChampionsOfKhazad.Bot.Infrastructure:environment: Development
+  ChampionsOfKhazad.Bot.Infrastructure:imageRegistryReadPassword:
+    secure: AAABAE89LZ7xot8j8vnguhuQmlBqjsp7DDF3pZC0lxcngh3XsReJNP2DxGLcje9ZTjv5zXyMxr2/xaY6ZZXrrL0hkE8=
+  ChampionsOfKhazad.Bot.Infrastructure:imageRegistryWritePassword:
+    secure: AAABAPbVs8rIHzu+UcdT2oe1fEezGfIzhTRrBP9LEFqR1LEXhfFaow+SQPpj/hCMPVrfMZkhRH5uB75MgxHfP7oM66o=

@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChampionsOfKhazad.Bot", "src/ChampionsOfKhazad.Bot/ChampionsOfKhazad.Bot.csproj", "{250AB7D4-9E29-41B4-8636-BDD934CC20EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AE87495F-C4DE-42DA-8BCB-DF6EC3792ACD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChampionsOfKhazad.Bot.Infrastructure", "src\ChampionsOfKhazad.Bot.Infrastructure\ChampionsOfKhazad.Bot.Infrastructure.csproj", "{F9F08389-512B-408D-A5BB-0F7BEFB06686}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{D06424C6-E36E-4957-8FA4-FF337DEBF9A3}"
+	ProjectSection(SolutionItems) = preProject
+		.config\dotnet-tools.json = .config\dotnet-tools.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5B231EE9-6669-4A17-BDA5-5C52B52AECDC}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{250AB7D4-9E29-41B4-8636-BDD934CC20EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{250AB7D4-9E29-41B4-8636-BDD934CC20EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{250AB7D4-9E29-41B4-8636-BDD934CC20EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{250AB7D4-9E29-41B4-8636-BDD934CC20EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9F08389-512B-408D-A5BB-0F7BEFB06686}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9F08389-512B-408D-A5BB-0F7BEFB06686}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9F08389-512B-408D-A5BB-0F7BEFB06686}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9F08389-512B-408D-A5BB-0F7BEFB06686}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{250AB7D4-9E29-41B4-8636-BDD934CC20EF} = {AE87495F-C4DE-42DA-8BCB-DF6EC3792ACD}
+		{F9F08389-512B-408D-A5BB-0F7BEFB06686} = {AE87495F-C4DE-42DA-8BCB-DF6EC3792ACD}
+	EndGlobalSection
+EndGlobal

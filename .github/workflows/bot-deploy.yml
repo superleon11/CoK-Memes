@@ -1,0 +1,22 @@
+name: Deploy Bot
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - bot/**
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pulumi/actions@v4
+        with:
+          command: up
+          stack-name: prod
+          work-dir: bot/src/ChampionsOfKhazad.Bot.Infrastructure/
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
