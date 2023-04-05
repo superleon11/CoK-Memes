@@ -6,6 +6,7 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
 {
     private readonly string _emoteName;
     private readonly ulong _channelId;
+    private readonly ulong _botId;
     private readonly bool _allowSingleUserStreaks;
     private Emote? _emote;
 
@@ -13,6 +14,7 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
     {
         _emoteName = options.EmoteName;
         _channelId = options.ChannelId;
+        _botId = options.BotId;
         _allowSingleUserStreaks = options.AllowSingleUserStreaks;
     }
 
@@ -41,10 +43,12 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
 
         await foreach (var previousMessage in message.GetPreviousMessagesAsync())
         {
-            // Ignore messages that aren't from users
+            // Ignore messages that aren't from users or are from other bots
+            // Messages from this bot should break the streak
+            // Otherwise users can edit their messages after a streak is broken to continue it
             if (
                 previousMessage is not IUserMessage previousUserMessage
-                || previousMessage.Author.IsBot
+                || (previousMessage.Author.IsBot && previousUserMessage.Author.Id != _botId)
             )
                 continue;
 
