@@ -6,8 +6,10 @@ using Pulumi.AzureNative.App;
 using Pulumi.AzureNative.App.Inputs;
 using Pulumi.Docker;
 using Pulumi.Docker.Inputs;
+using Pulumi.Random;
 using Config = Pulumi.Config;
 using ContainerArgs = Pulumi.AzureNative.App.Inputs.ContainerArgs;
+using Resource = Pulumi.Resource;
 using SecretArgs = Pulumi.AzureNative.App.Inputs.SecretArgs;
 
 return await Pulumi.Deployment.RunAsync(() =>
@@ -69,24 +71,30 @@ return await Pulumi.Deployment.RunAsync(() =>
     const string imageRegistryServer = "docker.io";
     var imageRegistryUsername = config.Require("imageRegistryUsername");
 
-    var botImage = new Image(
-        "bot-image",
-        new ImageArgs
-        {
-            ImageName = "uncledave/cok-bot:latest",
-            Build = new DockerBuildArgs
+    Image CreateImage(string name, Input<string> tag, Resource? dependsOn = null) =>
+        new(
+            name,
+            new ImageArgs
             {
-                Context = "../ChampionsOfKhazad.Bot/",
-                Platform = "linux/amd64"
+                ImageName = Output.Format($"uncledave/cok-bot:{tag}"),
+                Build = new DockerBuildArgs
+                {
+                    Context = "../ChampionsOfKhazad.Bot/",
+                    Platform = "linux/amd64"
+                },
+                Registry = new RegistryArgs
+                {
+                    Server = imageRegistryServer,
+                    Username = imageRegistryUsername,
+                    Password = config.RequireSecret("imageRegistryWritePassword")
+                }
             },
-            Registry = new RegistryArgs
-            {
-                Server = imageRegistryServer,
-                Username = imageRegistryUsername,
-                Password = config.RequireSecret("imageRegistryWritePassword")
-            }
-        }
-    );
+            new CustomResourceOptions { DependsOn = dependsOn }
+        );
+
+    var uniqueImageTag = new RandomUuid("unique-bot-image-id");
+    var botImage = CreateImage("bot-image", "latest");
+    var uniqueBotImage = CreateImage("unique-bot-image", uniqueImageTag.Result, botImage);
 
     const string botTokenSecretName = "bot-token";
     const string imageRegistryReadPasswordSecretName = "registry-read-password";
@@ -124,7 +132,7 @@ return await Pulumi.Deployment.RunAsync(() =>
                 Containers = new ContainerArgs
                 {
                     Name = "bot",
-                    Image = botImage.ImageName,
+                    Image = uniqueBotImage.ImageName,
                     Env =
                     {
                         new EnvironmentVarArgs
