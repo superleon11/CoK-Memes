@@ -8,7 +8,8 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
     private readonly ulong _channelId;
     private readonly ulong _botId;
     private readonly bool _allowSingleUserStreaks;
-    private Emote? _emote;
+    private IEmote? _emote;
+    private IGuildChannel? _channel;
 
     public EmoteStreakMessageHandler(EmoteStreakMessageHandlerOptions options)
     {
@@ -20,8 +21,8 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
 
     public async Task StartAsync(IGuild guild)
     {
-        var emotes = await guild.GetEmotesAsync();
-        _emote = emotes.Single(x => x.Name == _emoteName);
+        _emote = await guild.GetEmotesAsync().SingleAsync(x => x.Name == _emoteName);
+        _channel = await guild.GetChannelAsync(_channelId);
     }
 
     public async Task HandleMessageAsync(IUserMessage message)
@@ -73,5 +74,5 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
     }
 
     public override string ToString() =>
-        $"{nameof(EmoteStreakMessageHandler)} - :{_emoteName}: in #{_channelId}";
+        $"{nameof(EmoteStreakMessageHandler)} - :{_emoteName}: in #{_channel?.Name ?? _channelId.ToString()}";
 }

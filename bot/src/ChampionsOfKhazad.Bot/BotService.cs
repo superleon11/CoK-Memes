@@ -79,6 +79,11 @@ public class BotService : IHostedService
             }
         }
 
+        _startedMessageHandlers.ForEach(
+            messageHandler =>
+                _logger.LogDebug("Started message handler {MessageHandler}", messageHandler)
+        );
+
         _logger.LogInformation("Bot started");
     }
 
