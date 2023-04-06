@@ -53,9 +53,15 @@ if (messageHandlerOptions is not null)
             throw new ArgumentException(
                 $"{MessageHandlerOptions.Key}:{nameof(MessageHandlerOptions.EmoteStreak)}:{nameof(EmoteStreakMessageHandlerOptions.EmoteName)} is required"
             );
+
         if (emoteStreakOptions.ChannelId == default)
             throw new ArgumentException(
                 $"{MessageHandlerOptions.Key}:{nameof(MessageHandlerOptions.EmoteStreak)}:{nameof(EmoteStreakMessageHandlerOptions.ChannelId)} is required"
+            );
+
+        if (emoteStreakOptions.BotId == default)
+            throw new ArgumentException(
+                $"{MessageHandlerOptions.Key}:{nameof(MessageHandlerOptions.EmoteStreak)}:{nameof(EmoteStreakMessageHandlerOptions.BotId)} is required"
             );
 
         host.Services.AddSingleton<IMessageHandler>(
