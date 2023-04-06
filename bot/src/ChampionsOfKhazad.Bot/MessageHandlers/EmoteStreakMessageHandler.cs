@@ -39,7 +39,7 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
             return;
 
         var streak = 0;
-        var previousAuthorId = message.Author.Id;
+        ulong? previousAuthorId = null;
 
         await foreach (var previousMessage in message.GetPreviousMessagesAsync())
         {
@@ -48,7 +48,7 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
             // Otherwise users can edit their messages after a streak is broken to continue it
             if (
                 previousMessage is not IUserMessage previousUserMessage
-                || (previousMessage.Author.IsBot && previousUserMessage.Author.Id != _botId)
+                || (previousMessage.Author.IsBot && previousMessage.Author.Id != _botId)
             )
                 continue;
 
