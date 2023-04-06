@@ -92,8 +92,13 @@ return await Pulumi.Deployment.RunAsync(() =>
             new CustomResourceOptions { DependsOn = dependsOn }
         );
 
-    var uniqueImageTag = new RandomUuid("unique-bot-image-id");
     var botImage = CreateImage("bot-image", "latest");
+
+    var uniqueImageTag = new RandomUuid(
+        "unique-bot-image-id",
+        new RandomUuidArgs { Keepers = { { "digest", botImage.RepoDigest! } } }
+    );
+
     var uniqueBotImage = CreateImage("unique-bot-image", uniqueImageTag.Result, botImage);
 
     const string botTokenSecretName = "bot-token";
