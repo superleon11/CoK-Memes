@@ -12,8 +12,5 @@ public class EmoteStreakHandlerOptions
     [Required]
     public required ulong ChannelId { get; set; }
 
-    [Required]
-    public required ulong BotId { get; set; }
-
     public bool AllowSingleUserStreaks { get; set; }
 }

@@ -8,6 +8,7 @@ public class EmoteStreakHandler : IMessageReceivedEventHandler
     private readonly EmoteStreakHandlerOptions _options;
     private IEmote? _emote;
     private IGuildChannel? _channel;
+    private ulong? _botId;
 
     public EmoteStreakHandler(IOptions<EmoteStreakHandlerOptions> options)
     {
@@ -18,6 +19,7 @@ public class EmoteStreakHandler : IMessageReceivedEventHandler
     {
         _emote = await context.Guild.GetEmotesAsync().SingleAsync(x => x.Name == _options.EmoteName);
         _channel = await context.Guild.GetChannelAsync(_options.ChannelId);
+        _botId = context.BotId;
     }
 
     public async Task HandleMessageAsync(IUserMessage message)
@@ -44,7 +46,7 @@ public class EmoteStreakHandler : IMessageReceivedEventHandler
             // Otherwise users can edit their messages after a streak is broken to continue it
             if (
                 previousMessage is not IUserMessage previousUserMessage
-                || (previousMessage.Author.IsBot && previousMessage.Author.Id != _options.BotId)
+                || (previousMessage.Author.IsBot && previousMessage.Author.Id != _botId)
             )
                 continue;
 

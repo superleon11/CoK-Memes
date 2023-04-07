@@ -56,7 +56,7 @@ public class BotService : IHostedService
             guild.Channels.Select(x => x.Name)
         );
 
-        var context = new BotContext(guild);
+        var context = new BotContext(_client.Rest.CurrentUser.Id, guild);
         var startedEventHandlers = await StartEventHandlersAsync(_eventHandlers, context);
 
         _messageReceivedEventHandlers = startedEventHandlers.OfType<IMessageReceivedEventHandler>();
