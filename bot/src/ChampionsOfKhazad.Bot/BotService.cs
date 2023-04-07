@@ -10,22 +10,23 @@ public class BotService : IHostedService
 {
     private readonly DiscordSocketClient _client;
     private readonly ILogger _logger;
-    private readonly IEnumerable<IMessageHandler> _messageHandlers;
+    private readonly IEnumerable<IEventHandler> _eventHandlers;
     private readonly BotOptions _options;
 
-    private List<IMessageHandler> _startedMessageHandlers = new();
+    private IEnumerable<IMessageReceivedEventHandler> _messageReceivedEventHandlers =
+        Array.Empty<IMessageReceivedEventHandler>();
 
     public BotService(
         DiscordSocketClient client,
         ILogger<BotService> logger,
         IOptions<BotOptions> options,
-        IEnumerable<IMessageHandler> messageHandlers
+        IEnumerable<IEventHandler> eventHandlers
     )
     {
         _client = client;
         _logger = logger;
-        _messageHandlers = messageHandlers;
         _options = options.Value;
+        _eventHandlers = eventHandlers;
 
         _client.Ready += Ready;
         _client.MessageReceived += MessageReceivedAsync;
@@ -42,10 +43,7 @@ public class BotService : IHostedService
         await _client.StartAsync();
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await _client.StopAsync();
-    }
+    public async Task StopAsync(CancellationToken cancellationToken) => await _client.StopAsync();
 
     private async Task Ready()
     {
@@ -58,31 +56,10 @@ public class BotService : IHostedService
             guild.Channels.Select(x => x.Name)
         );
 
-        _startedMessageHandlers = _messageHandlers
-            .Where(x => x is not IGuildMessageHandler)
-            .ToList();
+        var context = new BotContext(guild);
+        var startedEventHandlers = await StartEventHandlersAsync(_eventHandlers, context);
 
-        foreach (var messageHandler in _messageHandlers.OfType<IGuildMessageHandler>())
-        {
-            try
-            {
-                await messageHandler.StartAsync(guild);
-                _startedMessageHandlers.Add(messageHandler);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(
-                    e,
-                    "Error starting message handler {MessageHandler}",
-                    messageHandler
-                );
-            }
-        }
-
-        _startedMessageHandlers.ForEach(
-            messageHandler =>
-                _logger.LogDebug("Started message handler {MessageHandler}", messageHandler)
-        );
+        _messageReceivedEventHandlers = startedEventHandlers.OfType<IMessageReceivedEventHandler>();
 
         _logger.LogInformation("Bot started");
     }
@@ -92,16 +69,35 @@ public class BotService : IHostedService
         if (message is not SocketUserMessage userMessage || message.Author.IsBot)
             return;
 
-        foreach (var messageHandler in _startedMessageHandlers)
+        foreach (var handler in _messageReceivedEventHandlers)
         {
             try
             {
-                await messageHandler.HandleMessageAsync(userMessage);
+                await handler.HandleMessageAsync(userMessage);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error handling message with {MessageHandler}", messageHandler);
+                _logger.LogError(e, "Error handling message with {EventHandler}", handler);
             }
         }
     }
+
+    private Task<IEnumerable<IEventHandler>> StartEventHandlersAsync(
+        IEnumerable<IEventHandler> eventHandlers,
+        BotContext context
+    ) =>
+        eventHandlers.WhereAsync(async eventHandler =>
+        {
+            try
+            {
+                await eventHandler.StartAsync(context);
+                _logger.LogDebug("Started event handler {EventHandler}", eventHandler);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error starting event handler {EventHandler}", eventHandler);
+                return false;
+            }
+        });
 }

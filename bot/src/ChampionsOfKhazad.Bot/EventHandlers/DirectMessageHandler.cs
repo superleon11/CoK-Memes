@@ -2,7 +2,7 @@
 
 namespace ChampionsOfKhazad.Bot;
 
-public class DirectMessageHandler : IMessageHandler
+public class DirectMessageHandler : IMessageReceivedEventHandler
 {
     private const string SourceUrl = "https://github.com/UncleDave/CoK-Memes/tree/main/bot";
 
@@ -16,13 +16,13 @@ public class DirectMessageHandler : IMessageHandler
         if (message.Channel is not IDMChannel)
             return Task.CompletedTask;
 
-        var onCooldown =
+        var isOnCooldown =
             _lastUserMessage.TryGetValue(message.Author.Id, out var lastMessage)
             && (DateTime.Now - lastMessage).TotalMinutes < 5;
 
         _lastUserMessage[message.Author.Id] = DateTime.Now;
 
-        return onCooldown ? Task.CompletedTask : message.Channel.SendMessageAsync(Message);
+        return isOnCooldown ? Task.CompletedTask : message.Channel.SendMessageAsync(Message);
     }
 
     public override string ToString() => nameof(DirectMessageHandler);

@@ -2,14 +2,16 @@
 
 namespace ChampionsOfKhazad.Bot;
 
-public class EmoteStreakMessageHandlerOptions
+public class EmoteStreakHandlerOptions
 {
+    public const string Key = "EmoteStreak";
+    
     [Required]
     public required string EmoteName { get; set; }
 
     [Required]
     public required ulong ChannelId { get; set; }
-    
+
     [Required]
     public required ulong BotId { get; set; }
 

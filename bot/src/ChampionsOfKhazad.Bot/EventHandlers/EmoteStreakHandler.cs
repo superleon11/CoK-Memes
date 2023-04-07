@@ -1,40 +1,35 @@
 ﻿using Discord;
+using Microsoft.Extensions.Options;
 
 namespace ChampionsOfKhazad.Bot;
 
-public class EmoteStreakMessageHandler : IGuildMessageHandler
+public class EmoteStreakHandler : IMessageReceivedEventHandler
 {
-    private readonly string _emoteName;
-    private readonly ulong _channelId;
-    private readonly ulong _botId;
-    private readonly bool _allowSingleUserStreaks;
+    private readonly EmoteStreakHandlerOptions _options;
     private IEmote? _emote;
     private IGuildChannel? _channel;
 
-    public EmoteStreakMessageHandler(EmoteStreakMessageHandlerOptions options)
+    public EmoteStreakHandler(IOptions<EmoteStreakHandlerOptions> options)
     {
-        _emoteName = options.EmoteName;
-        _channelId = options.ChannelId;
-        _botId = options.BotId;
-        _allowSingleUserStreaks = options.AllowSingleUserStreaks;
+        _options = options.Value;
     }
 
-    public async Task StartAsync(IGuild guild)
+    public async Task StartAsync(BotContext context)
     {
-        _emote = await guild.GetEmotesAsync().SingleAsync(x => x.Name == _emoteName);
-        _channel = await guild.GetChannelAsync(_channelId);
+        _emote = await context.Guild.GetEmotesAsync().SingleAsync(x => x.Name == _options.EmoteName);
+        _channel = await context.Guild.GetChannelAsync(_options.ChannelId);
     }
 
     public async Task HandleMessageAsync(IUserMessage message)
     {
         if (_emote is null)
             throw new InvalidOperationException(
-                $"{nameof(EmoteStreakMessageHandler)} has not been started"
+                $"{nameof(EmoteStreakHandler)} has not been started"
             );
 
         if (
             message.Channel is not ITextChannel textChannel
-            || (textChannel.CategoryId != _channelId && textChannel.Id != _channelId)
+            || (textChannel.CategoryId != _options.ChannelId && textChannel.Id != _options.ChannelId)
             || message.Content == _emote.ToString()
         )
             return;
@@ -49,7 +44,7 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
             // Otherwise users can edit their messages after a streak is broken to continue it
             if (
                 previousMessage is not IUserMessage previousUserMessage
-                || (previousMessage.Author.IsBot && previousMessage.Author.Id != _botId)
+                || (previousMessage.Author.IsBot && previousMessage.Author.Id != _options.BotId)
             )
                 continue;
 
@@ -58,7 +53,7 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
                 break;
 
             // Ignore repeat messages from the same user
-            if (!_allowSingleUserStreaks && previousUserMessage.Author.Id == previousAuthorId)
+            if (!_options.AllowSingleUserStreaks && previousUserMessage.Author.Id == previousAuthorId)
                 continue;
 
             previousAuthorId = previousUserMessage.Author.Id;
@@ -74,5 +69,5 @@ public class EmoteStreakMessageHandler : IGuildMessageHandler
     }
 
     public override string ToString() =>
-        $"{nameof(EmoteStreakMessageHandler)} - :{_emoteName}: in #{_channel?.Name ?? _channelId.ToString()}";
+        $"{nameof(EmoteStreakHandler)} - :{_options.EmoteName}: in #{_channel?.Name ?? _options.ChannelId.ToString()}";
 }

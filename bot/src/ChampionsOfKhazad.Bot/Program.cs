@@ -1,7 +1,6 @@
 ﻿using ChampionsOfKhazad.Bot;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -18,11 +17,9 @@ Log.Logger = new LoggerConfiguration()
 
 host.Logging.ClearProviders().AddSerilog();
 
-host.Services
-    .AddOptions<BotOptions>()
-    .Bind(host.Configuration.GetSection(BotOptions.Key))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+host.Services.AddOptionsWithEagerValidation<BotOptions>(
+    host.Configuration.GetSection(BotOptions.Key)
+);
 
 host.Services.AddSingleton<DiscordSocketClient>(
     services =>
@@ -41,36 +38,11 @@ host.Services.AddSingleton<DiscordSocketClient>(
         )
 );
 
-var messageHandlerOptions = host.Configuration
-    .GetSection(MessageHandlerOptions.Key)
-    .Get<MessageHandlerOptions>();
-
-if (messageHandlerOptions is not null)
-{
-    foreach (var emoteStreakOptions in messageHandlerOptions.EmoteStreak)
-    {
-        if (emoteStreakOptions.EmoteName == default)
-            throw new ArgumentException(
-                $"{MessageHandlerOptions.Key}:{nameof(MessageHandlerOptions.EmoteStreak)}:{nameof(EmoteStreakMessageHandlerOptions.EmoteName)} is required"
-            );
-
-        if (emoteStreakOptions.ChannelId == default)
-            throw new ArgumentException(
-                $"{MessageHandlerOptions.Key}:{nameof(MessageHandlerOptions.EmoteStreak)}:{nameof(EmoteStreakMessageHandlerOptions.ChannelId)} is required"
-            );
-
-        if (emoteStreakOptions.BotId == default)
-            throw new ArgumentException(
-                $"{MessageHandlerOptions.Key}:{nameof(MessageHandlerOptions.EmoteStreak)}:{nameof(EmoteStreakMessageHandlerOptions.BotId)} is required"
-            );
-
-        host.Services.AddSingleton<IMessageHandler>(
-            new EmoteStreakMessageHandler(emoteStreakOptions)
-        );
-    }
-}
-
-host.Services.AddSingleton<IMessageHandler, DirectMessageHandler>();
+host.Services
+    .AddEventHandler<DirectMessageHandler>()
+    .AddEventHandler<EmoteStreakHandler, EmoteStreakHandlerOptions>(
+        host.Configuration.GetSection($"{EventHandlerOptions.Key}:{EmoteStreakHandlerOptions.Key}")
+    );
 
 host.Services.AddHostedService<BotService>();
 host.Build().Run();

@@ -2,7 +2,7 @@
 
 namespace ChampionsOfKhazad.Bot;
 
-public interface IMessageHandler
+public interface IMessageReceivedEventHandler : IEventHandler
 {
     Task HandleMessageAsync(IUserMessage message);
 }
