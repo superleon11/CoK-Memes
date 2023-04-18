@@ -137,6 +137,11 @@ return await Pulumi.Deployment.RunAsync(() =>
                             Name = "DOTNET_ENVIRONMENT",
                             Value = config.Require("environment")
                         }
+                    },
+                    Resources = new ContainerResourcesArgs
+                    {
+                        Cpu = .25,
+                        Memory = "256Mi",
                     }
                 },
                 Scale = new ScaleArgs { MinReplicas = 1, MaxReplicas = 1 }
