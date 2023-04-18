@@ -141,7 +141,7 @@ return await Pulumi.Deployment.RunAsync(() =>
                     Resources = new ContainerResourcesArgs
                     {
                         Cpu = .25,
-                        Memory = "0.15Gi"
+                        Memory = "0.5Gi"
                     }
                 },
                 Scale = new ScaleArgs { MinReplicas = 1, MaxReplicas = 1 }
