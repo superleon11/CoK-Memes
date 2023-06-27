@@ -27,4 +27,6 @@ public static class RandomUtils
             _ => $"{value}th"
         };
     }
+
+    public static bool RollTheDice(int chance) => Random.Next(1, 101) <= chance;
 }

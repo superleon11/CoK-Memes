@@ -46,6 +46,9 @@ host.Services
     )
     .AddEventHandler<SummonUserHandler, SummonUserHandlerOptions>(
         host.Configuration.GetEventHandlerSection(SummonUserHandlerOptions.Key)
+    )
+    .AddEventHandler<ReactionHandler, ReactionHandlerOptions>(
+        host.Configuration.GetEventHandlerSection(ReactionHandlerOptions.Key)
     );
 
 host.Services.AddHostedService<BotService>();
