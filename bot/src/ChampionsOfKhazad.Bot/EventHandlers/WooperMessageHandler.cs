@@ -22,6 +22,4 @@ public class WooperMessageHandler : IMessageReceivedEventHandler
             await message.AddReactionsAsync(new[] { _clown, _skull, _nerd });
         }
     }
-
-    public override string ToString() => nameof(WooperMessageHandler);
 }
