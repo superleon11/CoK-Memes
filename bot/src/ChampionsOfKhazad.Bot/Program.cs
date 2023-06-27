@@ -9,6 +9,7 @@ using Serilog.Events;
 
 var host = Host.CreateApplicationBuilder(args);
 
+// csharpier-ignore
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Is(host.Environment.IsProduction() ? LogEventLevel.Information : LogEventLevel.Debug)
     .Enrich.FromLogContext()
@@ -42,6 +43,11 @@ host.Services
     .AddEventHandler<DirectMessageHandler>()
     .AddEventHandler<EmoteStreakHandler, EmoteStreakHandlerOptions>(
         host.Configuration.GetSection($"{EventHandlerOptions.Key}:{EmoteStreakHandlerOptions.Key}")
+    )
+    .AddEventHandler<WooperMessageHandler, WooperMessageHandlerOptions>(
+        host.Configuration.GetSection(
+            $"{EventHandlerOptions.Key}:{WooperMessageHandlerOptions.Key}"
+        )
     );
 
 host.Services.AddHostedService<BotService>();
