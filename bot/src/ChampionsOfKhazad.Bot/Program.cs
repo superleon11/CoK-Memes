@@ -9,6 +9,7 @@ using Serilog.Events;
 
 var host = Host.CreateApplicationBuilder(args);
 
+// csharpier-ignore
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Is(host.Environment.IsProduction() ? LogEventLevel.Information : LogEventLevel.Debug)
     .Enrich.FromLogContext()
@@ -41,7 +42,10 @@ host.Services.AddSingleton<DiscordSocketClient>(
 host.Services
     .AddEventHandler<DirectMessageHandler>()
     .AddEventHandler<EmoteStreakHandler, EmoteStreakHandlerOptions>(
-        host.Configuration.GetSection($"{EventHandlerOptions.Key}:{EmoteStreakHandlerOptions.Key}")
+        host.Configuration.GetEventHandlerSection(EmoteStreakHandlerOptions.Key)
+    )
+    .AddEventHandler<SummonUserHandler, SummonUserHandlerOptions>(
+        host.Configuration.GetEventHandlerSection(SummonUserHandlerOptions.Key)
     );
 
 host.Services.AddHostedService<BotService>();
