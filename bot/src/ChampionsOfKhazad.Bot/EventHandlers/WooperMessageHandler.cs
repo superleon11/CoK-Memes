@@ -6,23 +6,20 @@ namespace ChampionsOfKhazad.Bot;
 public class WooperMessageHandler : IMessageReceivedEventHandler
 {
     private readonly WooperMessageHandlerOptions _options;
-    private IEmote? _emote;
+    private readonly Emoji _clown = new("🤡");
+    private readonly Emoji _skull = new("💀");
+    private readonly Emoji _nerd = new("🤓");
 
     public WooperMessageHandler(IOptions<WooperMessageHandlerOptions> options)
     {
         _options = options.Value;
     }
 
-    public async Task StartAsync(BotContext context)
-    {
-        _emote = await context.Guild.GetEmotesAsync().SingleAsync(x => x.Name == "gigachad");
-    }
-
     public async Task HandleMessageAsync(IUserMessage message)
     {
         if (message.Author.Id == _options.UserId)
         {
-            await message.AddReactionAsync(_emote);
+            await message.AddReactionsAsync(new[] { _clown, _skull, _nerd });
         }
     }
 
