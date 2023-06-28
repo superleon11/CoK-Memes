@@ -1,4 +1,5 @@
-﻿using ChampionsOfKhazad.Bot.ChatBot;
+﻿using System.Text.RegularExpressions;
+using ChampionsOfKhazad.Bot.ChatBot;
 using Discord;
 using OpenAI.ObjectModels;
 using OpenAI.ObjectModels.RequestModels;
@@ -7,6 +8,8 @@ namespace ChampionsOfKhazad.Bot;
 
 public class MentionHandler : IMessageReceivedEventHandler
 {
+    private static readonly Regex NameExpression =
+        new("^[a-zA-Z0-9_-]{1,64}$", RegexOptions.Compiled);
     private readonly Assistant _assistant;
     private ulong _botId;
 
@@ -36,9 +39,15 @@ public class MentionHandler : IMessageReceivedEventHandler
             var user = new User
             {
                 Id = message.Author.Id,
-                Name = message.Author is IGuildUser guildUser
-                    ? guildUser.DisplayName
-                    : message.Author.GlobalName
+                Name =
+                    message.Author is IGuildUser guildUser
+                    && NameExpression.IsMatch(guildUser.DisplayName)
+                        ? guildUser.DisplayName
+                        : NameExpression.IsMatch(message.Author.GlobalName)
+                            ? message.Author.GlobalName
+                            : NameExpression.IsMatch(message.Author.Username)
+                                ? message.Author.Username
+                                : message.Author.Id.ToString()
             };
 
             var previousMessages = await message
