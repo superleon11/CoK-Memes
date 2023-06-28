@@ -36,19 +36,7 @@ public class MentionHandler : IMessageReceivedEventHandler
         {
             using var typing = textChannel.EnterTypingState();
 
-            var user = new User
-            {
-                Id = message.Author.Id,
-                Name =
-                    message.Author is IGuildUser guildUser
-                    && NameExpression.IsMatch(guildUser.DisplayName)
-                        ? guildUser.DisplayName
-                        : NameExpression.IsMatch(message.Author.GlobalName)
-                            ? message.Author.GlobalName
-                            : NameExpression.IsMatch(message.Author.Username)
-                                ? message.Author.Username
-                                : message.Author.Id.ToString()
-            };
+            var user = new User { Id = message.Author.Id, Name = GetFriendlyAuthorName(message) };
 
             var previousMessages = await message
                 .GetPreviousMessagesAsync()
@@ -61,7 +49,7 @@ public class MentionHandler : IMessageReceivedEventHandler
                                 ? StaticValues.ChatMessageRoles.Assistant
                                 : StaticValues.ChatMessageRoles.User,
                             x.CleanContent,
-                            x.Author.GlobalName
+                            GetFriendlyAuthorName(x)
                         )
                 )
                 .ToListAsync();
@@ -77,6 +65,15 @@ public class MentionHandler : IMessageReceivedEventHandler
 
         return Task.CompletedTask;
     }
+
+    private static string GetFriendlyAuthorName(IMessage message) =>
+        message.Author is IGuildUser guildUser && NameExpression.IsMatch(guildUser.DisplayName)
+            ? guildUser.DisplayName
+            : NameExpression.IsMatch(message.Author.GlobalName)
+                ? message.Author.GlobalName
+                : NameExpression.IsMatch(message.Author.Username)
+                    ? message.Author.Username
+                    : message.Author.Id.ToString();
 
     public override string ToString() => $"{nameof(MentionHandler)}";
 }
