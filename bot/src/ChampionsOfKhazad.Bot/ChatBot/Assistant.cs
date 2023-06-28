@@ -2,6 +2,7 @@
 using OpenAI.Interfaces;
 using OpenAI.ObjectModels;
 using OpenAI.ObjectModels.RequestModels;
+using OpenAI.ObjectModels.ResponseModels;
 
 namespace ChampionsOfKhazad.Bot.ChatBot;
 
@@ -40,33 +41,43 @@ public class Assistant
     {
         // TODO: Information based on context.
 
-        var result = await _openAiService.ChatCompletion.CreateCompletion(
-            new ChatCompletionCreateRequest
-            {
-                Messages = chatContext
-                    .Prepend(
-                        ChatMessage.FromSystem(
-                            string.Join(
-                                '\n',
-                                Instructions,
+        ChatCompletionCreateResponse result;
+
+        try
+        {
+            result = await _openAiService.ChatCompletion.CreateCompletion(
+                new ChatCompletionCreateRequest
+                {
+                    Messages = chatContext
+                        .Prepend(
+                            ChatMessage.FromSystem(
                                 string.Join(
                                     '\n',
-                                    GuildContext.ContextMap
-                                        .Where(x => message.ToLowerInvariant().Contains(x.Key))
-                                        .Select(x => x.Value)
-                                        .Distinct()
+                                    Instructions,
+                                    string.Join(
+                                        '\n',
+                                        GuildContext.ContextMap
+                                            .Where(x => message.ToLowerInvariant().Contains(x.Key))
+                                            .Select(x => x.Value)
+                                            .Distinct()
+                                    )
                                 )
                             )
                         )
-                    )
-                    .Append(ChatMessage.FromUser(message, user.Name))
-                    .ToList(),
-                Model = Models.ChatGpt3_5Turbo,
-                MaxTokens = 200,
-                N = 1,
-                User = user.Id.ToString()
-            }
-        );
+                        .Append(ChatMessage.FromUser(message, user.Name))
+                        .ToList(),
+                    Model = Models.ChatGpt3_5Turbo,
+                    MaxTokens = 200,
+                    N = 1,
+                    User = user.Id.ToString()
+                }
+            );
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Chat completion request failed");
+            return "I'm sorry, I'm having a stroke.";
+        }
 
         _logger.LogDebug("Chat completion successful: {Successful}", result.Successful);
 
