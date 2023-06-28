@@ -67,11 +67,14 @@ public class MentionHandler : IMessageReceivedEventHandler
     }
 
     private static string GetFriendlyAuthorName(IMessage message) =>
-        message.Author is IGuildUser guildUser && NameExpression.IsMatch(guildUser.DisplayName)
+        message.Author is IGuildUser { DisplayName: not null } guildUser
+        && NameExpression.IsMatch(guildUser.DisplayName)
             ? guildUser.DisplayName
-            : NameExpression.IsMatch(message.Author.GlobalName)
+            : message.Author.GlobalName is not null
+            && NameExpression.IsMatch(message.Author.GlobalName)
                 ? message.Author.GlobalName
-                : NameExpression.IsMatch(message.Author.Username)
+                : message.Author.Username is not null
+                && NameExpression.IsMatch(message.Author.Username)
                     ? message.Author.Username
                     : message.Author.Id.ToString();
 
