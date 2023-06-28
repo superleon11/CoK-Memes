@@ -33,7 +33,13 @@ public class MentionHandler : IMessageReceivedEventHandler
         {
             using var typing = textChannel.EnterTypingState();
 
-            var user = new User { Id = message.Author.Id, Name = message.Author.GlobalName };
+            var user = new User
+            {
+                Id = message.Author.Id,
+                Name = message.Author is IGuildUser guildUser
+                    ? guildUser.DisplayName
+                    : message.Author.GlobalName
+            };
 
             var previousMessages = await message
                 .GetPreviousMessagesAsync()
