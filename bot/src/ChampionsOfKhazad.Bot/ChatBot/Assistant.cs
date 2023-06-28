@@ -81,6 +81,16 @@ public class Assistant
 
         _logger.LogDebug("Chat completion successful: {Successful}", result.Successful);
 
+        if (!result.Successful)
+        {
+            _logger.LogError(
+                "Chat completion failed: {ErrorCode}:{ErrorMessage}",
+                result.Error?.Code,
+                result.Error?.Message
+            );
+            return "I'm sorry, I'm having a stroke.";
+        }
+
         var choice =
             result.Choices.FirstOrDefault(x => x.FinishReason == "stop")
             ?? result.Choices.FirstOrDefault();
