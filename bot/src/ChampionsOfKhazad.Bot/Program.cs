@@ -13,7 +13,7 @@ var host = Host.CreateApplicationBuilder(args);
 
 // csharpier-ignore
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Is(host.Environment.IsProduction() ? LogEventLevel.Information : LogEventLevel.Debug)
+    .MinimumLevel.Is(LogEventLevel.Debug)
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateLogger();
