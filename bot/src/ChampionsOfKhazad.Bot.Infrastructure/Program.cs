@@ -90,6 +90,7 @@ return await Pulumi.Deployment.RunAsync(() =>
 
     const string botTokenSecretName = "bot-token";
     const string imageRegistryReadPasswordSecretName = "registry-read-password";
+    const string openAiApiKeySecretName = "open-ai-api-key";
 
     var containerApp = new ContainerApp(
         "bot-app",
@@ -116,6 +117,11 @@ return await Pulumi.Deployment.RunAsync(() =>
                     {
                         Name = imageRegistryReadPasswordSecretName,
                         Value = config.RequireSecret("imageRegistryReadPassword")
+                    },
+                    new SecretArgs
+                    {
+                        Name = openAiApiKeySecretName,
+                        Value = config.RequireSecret("openAiApiKey")
                     }
                 }
             },
@@ -136,13 +142,14 @@ return await Pulumi.Deployment.RunAsync(() =>
                         {
                             Name = "DOTNET_ENVIRONMENT",
                             Value = config.Require("environment")
+                        },
+                        new EnvironmentVarArgs
+                        {
+                            Name = "OpenAIServiceOptions__ApiKey",
+                            SecretRef = openAiApiKeySecretName
                         }
                     },
-                    Resources = new ContainerResourcesArgs
-                    {
-                        Cpu = .25,
-                        Memory = "0.5Gi"
-                    }
+                    Resources = new ContainerResourcesArgs { Cpu = .25, Memory = "0.5Gi" }
                 },
                 Scale = new ScaleArgs { MinReplicas = 1, MaxReplicas = 1 }
             }

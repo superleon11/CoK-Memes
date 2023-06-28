@@ -1,9 +1,11 @@
 ﻿using ChampionsOfKhazad.Bot;
+using ChampionsOfKhazad.Bot.ChatBot;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenAI.Extensions;
 using Serilog;
 using Serilog.Events;
 
@@ -39,6 +41,9 @@ host.Services.AddSingleton<DiscordSocketClient>(
         )
 );
 
+host.Services.AddOpenAIService();
+host.Services.AddSingleton<Assistant>();
+
 host.Services
     .AddEventHandler<DirectMessageHandler>()
     .AddEventHandler<EmoteStreakHandler, EmoteStreakHandlerOptions>(
@@ -49,7 +54,8 @@ host.Services
     )
     .AddEventHandler<ReactionHandler, ReactionHandlerOptions>(
         host.Configuration.GetEventHandlerSection(ReactionHandlerOptions.Key)
-    );
+    )
+    .AddEventHandler<MentionHandler>();
 
 host.Services.AddHostedService<BotService>();
 host.Build().Run();
