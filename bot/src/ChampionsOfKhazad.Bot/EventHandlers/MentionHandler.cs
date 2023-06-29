@@ -49,20 +49,21 @@ public class MentionHandler : IMessageReceivedEventHandler
                 .Reverse()
                 .Select(
                     x =>
-                        new ChatMessage(
-                            x.Author.Id == _botId
-                                ? StaticValues.ChatMessageRoles.Assistant
-                                : StaticValues.ChatMessageRoles.User,
-                            x.CleanContent,
-                            GetFriendlyAuthorName(x)
-                        )
+                        new ChatMessage(GetMessageRole(x), x.CleanContent, GetFriendlyAuthorName(x))
                 )
                 .ToListAsync();
 
             var response = await _assistant.RespondAsync(
                 message.CleanContent,
                 user,
-                previousMessages
+                previousMessages,
+                message.ReferencedMessage is not null
+                    ? new ChatMessage(
+                        GetMessageRole(message.ReferencedMessage),
+                        message.ReferencedMessage.CleanContent,
+                        GetFriendlyAuthorName(message.ReferencedMessage)
+                    )
+                    : null
             );
 
             await message.ReplyAsync(response);
@@ -82,6 +83,11 @@ public class MentionHandler : IMessageReceivedEventHandler
                 && NameExpression.IsMatch(message.Author.Username)
                     ? message.Author.Username
                     : message.Author.Id.ToString();
+
+    private string GetMessageRole(IMessage message) =>
+        message.Author.Id == _botId
+            ? StaticValues.ChatMessageRoles.Assistant
+            : StaticValues.ChatMessageRoles.User;
 
     public override string ToString() => $"{nameof(MentionHandler)}";
 }

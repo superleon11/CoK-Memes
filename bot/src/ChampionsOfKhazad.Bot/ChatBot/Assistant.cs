@@ -35,10 +35,39 @@ public class Assistant
     public async Task<string> RespondAsync(
         string message,
         User user,
-        IEnumerable<ChatMessage> chatContext
+        IEnumerable<ChatMessage> chatContext,
+        ChatMessage? referencedMessage
     )
     {
         // TODO: Information based on context.
+
+        var messages = chatContext
+            .Prepend(
+                ChatMessage.FromSystem(
+                    string.Join(
+                        '\n',
+                        Instructions,
+                        string.Join(
+                            '\n',
+                            GuildContext.ContextMap
+                                .Where(x => message.ToLowerInvariant().Contains(x.Key))
+                                .Select(x => x.Value)
+                                .Distinct()
+                        )
+                    )
+                )
+            )
+            .Append(ChatMessage.FromUser(message, user.Name))
+            .ToList();
+
+        if (referencedMessage is not null)
+        {
+            messages.Add(
+                ChatMessage.FromSystem(
+                    $"The user is referencing this message from \"{referencedMessage.Name}\": \"{referencedMessage.Content}\""
+                )
+            );
+        }
 
         ChatCompletionCreateResponse result;
 
@@ -47,24 +76,7 @@ public class Assistant
             result = await _openAiService.ChatCompletion.CreateCompletion(
                 new ChatCompletionCreateRequest
                 {
-                    Messages = chatContext
-                        .Prepend(
-                            ChatMessage.FromSystem(
-                                string.Join(
-                                    '\n',
-                                    Instructions,
-                                    string.Join(
-                                        '\n',
-                                        GuildContext.ContextMap
-                                            .Where(x => message.ToLowerInvariant().Contains(x.Key))
-                                            .Select(x => x.Value)
-                                            .Distinct()
-                                    )
-                                )
-                            )
-                        )
-                        .Append(ChatMessage.FromUser(message, user.Name))
-                        .ToList(),
+                    Messages = messages,
                     Model = Models.ChatGpt3_5Turbo,
                     MaxTokens = 200,
                     N = 1,
