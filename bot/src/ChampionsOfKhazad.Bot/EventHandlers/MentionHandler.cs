@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using ChampionsOfKhazad.Bot.ChatBot;
 using Discord;
+using Microsoft.Extensions.Options;
 using OpenAI.ObjectModels;
 using OpenAI.ObjectModels.RequestModels;
 
@@ -10,11 +11,14 @@ public class MentionHandler : IMessageReceivedEventHandler
 {
     private static readonly Regex NameExpression =
         new("^[a-zA-Z0-9_-]{1,64}$", RegexOptions.Compiled);
+
+    private readonly MentionHandlerOptions _options;
     private readonly Assistant _assistant;
     private ulong _botId;
 
-    public MentionHandler(Assistant assistant)
+    public MentionHandler(IOptions<MentionHandlerOptions> options, Assistant assistant)
     {
+        _options = options.Value;
         _assistant = assistant;
     }
 
@@ -28,6 +32,7 @@ public class MentionHandler : IMessageReceivedEventHandler
     {
         if (
             message.Channel is not ITextChannel textChannel
+            || textChannel.Id != _options.ChannelId
             || !message.MentionedUserIds.Contains(_botId)
         )
             return Task.CompletedTask;

@@ -55,7 +55,9 @@ host.Services
     .AddEventHandler<ReactionHandler, ReactionHandlerOptions>(
         host.Configuration.GetEventHandlerSection(ReactionHandlerOptions.Key)
     )
-    .AddEventHandler<MentionHandler>();
+    .AddEventHandler<MentionHandler, MentionHandlerOptions>(
+        host.Configuration.GetEventHandlerSection(MentionHandlerOptions.Key)
+    );
 
 host.Services.AddHostedService<BotService>();
 host.Build().Run();
